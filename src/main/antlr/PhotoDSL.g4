@@ -18,6 +18,6 @@ exposureCommand: 'exposureTime' FLOAT_LITERAL;
 apertureCommand: 'aperture' FLOAT_LITERAL;
 isoCommand: 'iso' INT_LITERAL;
 
-STRING_LITERAL: '"' [a-zA-Z0-9 ]* '"';
+STRING_LITERAL: '"' (~["])* '"';
 FLOAT_LITERAL: '-'? [0-9]+ ('.' [0-9]+)?;
 INT_LITERAL: '-'? [0-9]+;

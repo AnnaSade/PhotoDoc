@@ -15,7 +15,8 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
-    implementation("org.antlr:antlr4:4.9.2")
+    //implementation("org.antlr:antlr4:4.9.2")
+    implementation("org.antlr:antlr4:4.5")
 }
 /*dependencies {
     testImplementation(kotlin("test"))
@@ -33,4 +34,8 @@ kotlin {
 
 application {
     mainClass.set("MainKt")
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    dependsOn("generateGrammarSource")
 }

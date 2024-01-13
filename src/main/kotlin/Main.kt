@@ -1,16 +1,17 @@
-package gen;
+package gen
 import PhotoDSLLexer
 import PhotoDSLParser
 import PhotoDSLBaseListener
-import PhotoDSLBaseVisitor
-//import org.antlr.v4.runtime.CharStreams
-//import org.antlr.v4.runtime.CommonTokenStream
+//import PhotoDSLBaseVisitor
+import org.antlr.v4.runtime.ANTLRInputStream
 
-import org.antlr.v4.runtime.CharStreams
+import org.antlr.v4.runtime.CharStream
 import org.antlr.v4.runtime.CommonTokenStream
+
 
 fun main() {
     val input = """
+       
         photoSession "Session1" {
             camera "Canon AE-1"
             film "Kodak Tri-X"
@@ -32,15 +33,17 @@ fun main() {
         }
     """
 
-    val lexer = PhotoDSLLexer(CharStreams.fromString(input))
+    val inputStream: CharStream = ANTLRInputStream(input)
+    val lexer = PhotoDSLLexer(inputStream)
     val tokens = CommonTokenStream(lexer)
     val parser = PhotoDSLParser(tokens)
+
 
     val customListener = CustomPhotoDSLListener()
     parser.addParseListener(customListener)
 
     // Parse startet die Verarbeitung der DSL
-    parser.photoSessions()
+    parser.photoSession()
 
     // Hier kannst du auf die gespeicherten PhotoSessions zugreifen
     val photoSessions = customListener.getPhotoSessions()
@@ -62,7 +65,7 @@ class CustomPhotoDSLListener : PhotoDSLBaseListener() {
 
     override fun enterPhotoSession(ctx: PhotoDSLParser.PhotoSessionContext) {
         // Hier wird eine neue PhotoSession gestartet
-        currentSessionName = ctx.ID().text
+        currentSessionName = ctx.STRING_LITERAL().text.replace("\"", "")
     }
 
     override fun exitPhotoSession(ctx: PhotoDSLParser.PhotoSessionContext) {
@@ -71,24 +74,24 @@ class CustomPhotoDSLListener : PhotoDSLBaseListener() {
         photoSessions.add(photoSession)
     }
 
-    override fun enterCamera(ctx: PhotoDSLParser.CameraContext) {
-        currentCamera = ctx.STRING().text
+    fun enterCamera(ctx: PhotoDSLParser.CameraCommandContext) {
+        currentCamera = ctx.STRING_LITERAL().text
     }
 
-    override fun enterFilm(ctx: PhotoDSLParser.FilmContext) {
-        currentFilm = ctx.STRING().text
+    fun enterFilm(ctx: PhotoDSLParser.FilmCommandContext) {
+        currentFilm = ctx.STRING_LITERAL().text
     }
 
-    override fun enterIso(ctx: PhotoDSLParser.IsoContext) {
-        currentISO = ctx.INT().text.toInt()
+    fun enterIso(ctx: PhotoDSLParser.IsoCommandContext) {
+        currentISO = ctx.INT_LITERAL().text.toInt()
     }
 
-    override fun enterExposureTime(ctx: PhotoDSLParser.ExposureTimeContext) {
-        currentExposureTime = ctx.RATIO().text.toDouble()
+    fun enterExposureTime(ctx: PhotoDSLParser.ExposureCommandContext) {
+        currentExposureTime = ctx.FLOAT_LITERAL().text.toDouble()
     }
 
-    override fun enterAperture(ctx: PhotoDSLParser.ApertureContext) {
-        currentAperture = ctx.STRING().text
+    fun enterAperture(ctx: PhotoDSLParser.ApertureCommandContext) {
+        currentAperture = ctx.FLOAT_LITERAL().text
     }
 
     fun getPhotoSessions(): List<PhotoSession> = photoSessions
@@ -98,14 +101,4 @@ data class PhotoSession(val name: String, val camera: String, val film: String, 
     override fun toString(): String {
         return "PhotoSession(name='$name', camera='$camera', film='$film', iso=$iso, exposureTime=$exposureTime, aperture='$aperture')"
     }
-}
-
-
-
-    fun main(args: Array<String>) {
-    println("Hello World!")
-
-    // Try adding program arguments via Run/Debug configuration.
-    // Learn more about running applications: https://www.jetbrains.com/help/idea/running-applications.html.
-    println("Program arguments: ${args.joinToString()}")
 }
